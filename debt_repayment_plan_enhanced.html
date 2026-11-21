@@ -1,0 +1,727 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>قوينا يا رب - خطة سداد الدين</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/fontsource/fonts/cairo@latest/arabic-400-normal.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/fontsource/fonts/cairo@latest/arabic-700-normal.css">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Cairo', sans-serif; }
+  :root {
+    --bg-deep: #0A0E27;
+    --bg-card: #141A3A;
+    --bg-card-2: #1C2347;
+    --gold: #D4AF37;
+    --gold-light: #F4D76E;
+    --cream: #F5F1E8;
+    --text: #E8E6E1;
+    --text-dim: #9CA3AF;
+    --success: #10B981;
+    --danger: #EF4444;
+    --warning: #F59E0B;
+    --border: rgba(212, 175, 55, 0.2);
+    --info: #3B82F6;
+  }
+  body {
+    background: linear-gradient(135deg, #0A0E27 0%, #141A3A 100%);
+    color: var(--text);
+    min-height: 100vh;
+    padding: 20px;
+  }
+  .container { max-width: 1200px; margin: 0 auto; }
+  .header { text-align: center; padding: 30px 20px; margin-bottom: 30px; border-bottom: 2px solid var(--gold); }
+  .header h1 { font-size: 2.5rem; color: var(--gold); font-weight: 700; margin-bottom: 8px; text-shadow: 0 2px 10px rgba(212, 175, 55, 0.3); }
+  .header p { color: var(--text-dim); font-size: 1rem; }
+  .bismillah { color: var(--gold-light); font-size: 1.3rem; margin-bottom: 10px; font-weight: 700; }
+  .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.85); display: flex; align-items: center; justify-content: center; z-index: 1000; backdrop-filter: blur(10px); }
+  .modal { background: var(--bg-card); border: 2px solid var(--gold); border-radius: 20px; padding: 40px; max-width: 500px; width: 90%; box-shadow: 0 20px 60px rgba(212, 175, 55, 0.2); max-height: 90vh; overflow-y: auto; }
+  .modal h2 { color: var(--gold); margin-bottom: 20px; text-align: center; font-size: 1.8rem; }
+  .form-group { margin-bottom: 20px; }
+  .form-group label { display: block; margin-bottom: 8px; color: var(--cream); font-weight: 700; }
+  .form-group input, .form-group textarea, .form-group select { width: 100%; padding: 14px; background: var(--bg-deep); border: 1px solid var(--border); border-radius: 10px; color: var(--text); font-size: 1.1rem; font-family: 'Cairo', sans-serif; }
+  .form-group input:focus, .form-group textarea:focus, .form-group select:focus { outline: none; border-color: var(--gold); box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.2); }
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+  .error-msg { color: var(--danger); font-size: 0.85rem; margin-top: 5px; display: none; }
+  .btn { padding: 12px 24px; border: none; border-radius: 10px; font-family: 'Cairo', sans-serif; font-weight: 700; font-size: 1rem; cursor: pointer; transition: all 0.3s; display: inline-flex; align-items: center; gap: 8px; }
+  .btn-sm { padding: 8px 16px; font-size: 0.85rem; }
+  .btn-primary { background: linear-gradient(135deg, var(--gold) 0%, var(--gold-light) 100%); color: var(--bg-deep); width: 100%; justify-content: center; padding: 14px; font-size: 1.1rem; }
+  .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 10px 25px rgba(212, 175, 55, 0.4); }
+  .btn-gold { background: linear-gradient(135deg, var(--gold) 0%, var(--gold-light) 100%); color: var(--bg-deep); }
+  .btn-outline { background: transparent; border: 2px solid var(--gold); color: var(--gold); }
+  .btn-outline:hover { background: var(--gold); color: var(--bg-deep); }
+  .btn-success { background: var(--success); color: white; }
+  .btn-danger { background: var(--danger); color: white; }
+  .btn-info { background: var(--info); color: white; }
+  .btn-secondary { background: var(--bg-card-2); color: var(--text); border: 1px solid var(--border); }
+  .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px; margin-bottom: 30px; }
+  .stat-card { background: linear-gradient(135deg, var(--bg-card) 0%, var(--bg-card-2) 100%); border: 1px solid var(--border); border-radius: 16px; padding: 24px; position: relative; overflow: hidden; transition: transform 0.3s; }
+  .stat-card:hover { transform: translateY(-4px); border-color: var(--gold); }
+  .stat-card::before { content: ''; position: absolute; top: 0; right: 0; width: 4px; height: 100%; background: var(--gold); }
+  .stat-card.success::before { background: var(--success); }
+  .stat-card.warning::before { background: var(--warning); }
+  .stat-card.danger::before { background: var(--danger); }
+  .stat-card.info::before { background: var(--info); }
+  .stat-label { color: var(--text-dim); font-size: 0.9rem; margin-bottom: 8px; }
+  .stat-value { font-size: 1.8rem; font-weight: 700; color: var(--cream); }
+  .stat-value.gold { color: var(--gold); }
+  .stat-value.success { color: var(--success); }
+  .stat-value.warning { color: var(--warning); }
+  .stat-value.danger { color: var(--danger); }
+  .stat-value.info { color: var(--info); }
+  .stat-sub { font-size: 0.85rem; color: var(--text-dim); margin-top: 4px; }
+  .chart-container { position: relative; height: 300px; width: 100%; }
+  .section { background: var(--bg-card); border: 1px solid var(--border); border-radius: 16px; padding: 24px; margin-bottom: 24px; }
+  .section-title { color: var(--gold); font-size: 1.4rem; margin-bottom: 20px; padding-bottom: 12px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 10px; }
+  .payers-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  .payer-card { background: var(--bg-card-2); border: 2px solid var(--border); border-radius: 14px; padding: 20px; text-align: center; transition: all 0.3s; }
+  .payer-card.wajdi { border-color: #3B82F6; }
+  .payer-card.shaban { border-color: #8B5CF6; }
+  .payer-name { font-size: 1.3rem; font-weight: 700; margin-bottom: 8px; }
+  .payer-card.wajdi .payer-name { color: #60A5FA; }
+  .payer-card.shaban .payer-name { color: #A78BFA; }
+  .payer-amount { font-size: 1.6rem; font-weight: 700; color: var(--cream); margin: 10px 0; }
+  .payer-label { color: var(--text-dim); font-size: 0.9rem; }
+  .installment { background: var(--bg-card-2); border: 1px solid var(--border); border-radius: 12px; padding: 16px; margin-bottom: 12px; display: grid; grid-template-columns: auto 1fr auto auto; gap: 16px; align-items: center; transition: all 0.3s; }
+  .installment.paid { background: linear-gradient(135deg, rgba(16, 185, 129, 0.1) 0%, rgba(16, 185, 129, 0.05) 100%); border-color: var(--success); }
+  .installment.upcoming { border-color: var(--warning); animation: pulse 2s infinite; }
+  .installment.overdue { border-color: var(--danger); background: linear-gradient(135deg, rgba(239, 68, 68, 0.1) 0%, rgba(239, 68, 68, 0.05) 100%); }
+  @keyframes pulse { 0%, 100% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.4); } 50% { box-shadow: 0 0 0 8px rgba(245, 158, 11, 0); } }
+  .inst-number { width: 40px; height: 40px; border-radius: 50%; background: var(--bg-deep); border: 2px solid var(--gold); display: flex; align-items: center; justify-content: center; font-weight: 700; color: var(--gold); }
+  .installment.paid .inst-number { background: var(--success); border-color: var(--success); color: white; }
+  .inst-info { display: flex; flex-direction: column; gap: 4px; }
+  .inst-date { font-weight: 700; color: var(--cream); font-size: 1rem; }
+  .inst-details { font-size: 0.85rem; color: var(--text-dim); }
+  .inst-notes { font-size: 0.8rem; color: var(--info); background: rgba(59, 130, 246, 0.1); padding: 4px 8px; border-radius: 6px; margin-top: 4px; }
+  .inst-amount { text-align: center; padding: 0 12px; }
+  .inst-amount .total { font-size: 1.2rem; font-weight: 700; color: var(--gold); }
+  .inst-amount .split { font-size: 0.75rem; color: var(--text-dim); margin-top: 4px; }
+  .inst-status { display: flex; flex-direction: column; gap: 6px; align-items: flex-end; }
+  .status-badge { padding: 4px 12px; border-radius: 20px; font-size: 0.8rem; font-weight: 700; }
+  .status-badge.paid { background: var(--success); color: white; }
+  .status-badge.upcoming { background: var(--warning); color: var(--bg-deep); }
+  .status-badge.overdue { background: var(--danger); color: white; }
+  .pay-btn { padding: 6px 14px; background: var(--gold); color: var(--bg-deep); border: none; border-radius: 8px; font-family: 'Cairo', sans-serif; font-weight: 700; font-size: 0.85rem; cursor: pointer; transition: all 0.3s; }
+  .pay-btn:hover { background: var(--gold-light); transform: scale(1.05); }
+  .pay-btn.paid { background: var(--success); color: white; }
+  .action-btns { display: flex; gap: 4px; }
+  .alert { background: linear-gradient(135deg, rgba(245, 158, 11, 0.15) 0%, rgba(245, 158, 11, 0.05) 100%); border: 2px solid var(--warning); border-radius: 12px; padding: 16px; margin-bottom: 20px; display: flex; align-items: center; gap: 12px; color: var(--warning); font-weight: 700; }
+  .alert-icon { font-size: 1.8rem; }
+  .actions-bar { display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: 24px; }
+  .progress-container { background: var(--bg-deep); border-radius: 10px; height: 12px; overflow: hidden; margin: 12px 0; }
+  .progress-bar { height: 100%; background: linear-gradient(90deg, var(--gold) 0%, var(--success) 100%); transition: width 0.5s; border-radius: 10px; }
+  .signature-box { background: var(--bg-card-2); border: 2px dashed var(--gold); border-radius: 12px; padding: 20px; text-align: center; margin-top: 20px; }
+  .signature-canvas { background: var(--cream); border-radius: 8px; cursor: crosshair; display: block; margin: 10px auto; max-width: 100%; touch-action: none; }
+  .signature-actions { display: flex; gap: 10px; justify-content: center; margin-top: 10px; flex-wrap: wrap; }
+  .shortcuts-help { background: var(--bg-card-2); border: 1px solid var(--border); border-radius: 12px; padding: 15px; margin-top: 10px; font-size: 0.85rem; color: var(--text-dim); }
+  .shortcuts-help kbd { background: var(--bg-deep); padding: 2px 6px; border-radius: 4px; font-family: monospace; color: var(--gold); border: 1px solid var(--border); }
+  .backup-reminder { background: linear-gradient(135deg, rgba(59, 130, 246, 0.15) 0%, rgba(59, 130, 246, 0.05) 100%); border: 2px solid var(--info); border-radius: 12px; padding: 16px; margin-bottom: 20px; display: flex; align-items: center; gap: 12px; color: var(--info); }
+  @media (max-width: 768px) { .header h1 { font-size: 1.8rem; } .payers-grid { grid-template-columns: 1fr; } .installment { grid-template-columns: auto 1fr; } .inst-amount, .inst-status { grid-column: 1 / -1; } .inst-status { flex-direction: row; justify-content: space-between; align-items: center; } .form-row { grid-template-columns: 1fr; } .stats-grid { grid-template-columns: repeat(2, 1fr); } .chart-container { height: 250px; } }
+  @media (max-width: 480px) { body { padding: 10px; } .stats-grid { grid-template-columns: 1fr; } .actions-bar { flex-direction: column; } .actions-bar .btn { width: 100%; } }
+  @media print { body { background: white; color: black; } .actions-bar, .pay-btn, .signature-actions, .btn, .edit-btn, .delete-btn { display: none !important; } .section, .stat-card, .payer-card, .installment { background: white !important; color: black !important; border-color: #333 !important; } .stat-value, .payer-name, .payer-amount, .inst-date, .inst-amount .total { color: black !important; } .header h1 { color: #D4AF37 !important; } .modal-overlay { display: none !important; } .backup-reminder, .shortcuts-help { display: none !important; } }
+  .hidden { display: none !important; }
+  .toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: var(--success); color: white; padding: 12px 24px; border-radius: 10px; font-weight: 700; z-index: 2000; box-shadow: 0 10px 30px rgba(0,0,0,0.3); animation: slideUp 0.3s; }
+  @keyframes slideUp { from { transform: translate(-50%, 100px); opacity: 0; } to { transform: translate(-50%, 0); opacity: 1; } }
+  .filter-bar { display: flex; gap: 10px; margin-bottom: 15px; flex-wrap: wrap; }
+  .filter-btn { padding: 8px 16px; background: var(--bg-card-2); border: 1px solid var(--border); color: var(--text); border-radius: 8px; cursor: pointer; transition: all 0.2s; }
+  .filter-btn.active { background: var(--gold); color: var(--bg-deep); border-color: var(--gold); }
+  .notes-input { width: 100%; padding: 12px; background: var(--bg-deep); border: 1px solid var(--border); border-radius: 8px; color: var(--text); font-family: 'Cairo', sans-serif; font-size: 1rem; min-height: 80px; resize: vertical; }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <div class="header">
+    <div class="bismillah">بسم الله الرحمن الرحيم</div>
+    <h1>قوينا يا رب 💪</h1>
+    <p>خطة سداد الدين - وجدي & شعبان</p>
+  </div>
+
+  <div id="alertBox"></div>
+  <div id="backupReminder"></div>
+
+  <!-- Setup Modal -->
+  <div id="setupModal" class="modal-overlay">
+    <div class="modal">
+      <h2>📝 إعداد خطة السداد</h2>
+      <div class="form-group">
+        <label>إجمالي قيمة الدين (ريال سعودي)</label>
+        <input type="number" id="totalDebt" placeholder="مثال: 10000" min="1" step="0.01">
+        <div class="error-msg" id="totalDebtError">من فضلك أدخل قيمة صالحة</div>
+      </div>
+      <div class="form-group">
+        <label>القسط الشهري الإجمالي (ريال سعودي)</label>
+        <input type="number" id="monthlyPayment" placeholder="مثال: 1000" min="1" step="0.01">
+        <div class="error-msg" id="monthlyPaymentError">من فضلك أدخل قيمة صالحة</div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>حصة وجدي الشهرية (ريال)</label>
+          <input type="number" id="wajdiShare" placeholder="مثال: 500" min="0" step="0.01">
+        </div>
+        <div class="form-group">
+          <label>حصة شعبان الشهرية (ريال)</label>
+          <input type="number" id="shabanShare" placeholder="مثال: 500" min="0" step="0.01">
+        </div>
+      </div>
+      <div id="shareWarning" style="color: var(--warning); font-size: 0.9rem; margin-bottom: 15px; display: none;">⚠️ مجموع الحصتين لا يساوي القسط الشهري</div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>تاريخ أول قسط</label>
+          <input type="date" id="firstDate">
+          <div class="error-msg" id="firstDateError">من فضلك أدخل تاريخ</div>
+        </div>
+        <div class="form-group">
+          <label>يوم السداد الشهري (1-28)</label>
+          <input type="number" id="payDay" min="1" max="28" placeholder="مثال: 15" value="15">
+        </div>
+      </div>
+      <button class="btn btn-primary" onclick="saveSetup()">💾 حفظ وبدء الخطة</button>
+      <div class="shortcuts-help">
+        <strong>اختصارات:</strong> <kbd>Ctrl</kbd>+<kbd>P</kbd> طباعة | <kbd>Ctrl</kbd>+<kbd>S</kbd> تصدير
+      </div>
+    </div>
+  </div>
+
+  <!-- Edit Modal -->
+  <div id="editModalOverlay" class="modal-overlay hidden">
+    <div class="modal">
+      <h2>📝 تعديل القسط</h2>
+      <div class="form-group">
+        <label>التاريخ</label>
+        <input type="date" id="editDate">
+      </div>
+      <div class="form-group">
+        <label>المبلغ الإجمالي (ر.س)</label>
+        <input type="number" id="editAmount" step="0.01" min="0">
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>حصة وجدي (ر.س)</label>
+          <input type="number" id="editWajdiAmount" step="0.01" min="0">
+        </div>
+        <div class="form-group">
+          <label>حصة شعبان (ر.س)</label>
+          <input type="number" id="editShabanAmount" step="0.01" min="0">
+        </div>
+      </div>
+      <div class="form-group">
+        <label>ملاحظات (اختياري)</label>
+        <textarea id="editNotes" class="notes-input" placeholder="مثال: دفع عبر STC Pay"></textarea>
+      </div>
+      <div class="form-group">
+        <label>طريقة الدفع</label>
+        <select id="editPaymentMethod">
+          <option value="">غير مدفوع</option>
+          <option value="كاش">كاش</option>
+          <option value="تحويل بنكي">تحويل بنكي</option>
+          <option value="STC Pay">STC Pay</option>
+          <option value="Apple Pay">Apple Pay</option>
+          <option value="بطاقة ائتمان">بطاقة ائتمان</option>
+          <option value="آخر">آخر</option>
+        </select>
+      </div>
+      <div style="display: flex; gap: 10px; margin-top: 20px; flex-wrap: wrap;">
+        <button class="btn btn-success" onclick="saveEdit()">✓ حفظ</button>
+        <button class="btn btn-outline" onclick="closeEditModal()">✕ إلغاء</button>
+        <button class="btn btn-danger" onclick="deleteInstallment()" id="deleteBtn">🗑️ حذف</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Dashboard -->
+  <div id="dashboard" class="hidden">
+    <div class="actions-bar">
+      <button class="btn btn-gold" onclick="window.print()">🖨️ طباعة</button>
+      <button class="btn btn-outline" onclick="exportData()">📤 تصدير</button>
+      <button class="btn btn-outline" onclick="document.getElementById('importFile').click()">📥 استيراد</button>
+      <input type="file" id="importFile" accept=".json" style="display:none" onchange="importData(event)">
+      <button class="btn btn-info" onclick="showEditModalForNew()">➕ إضافة قسط</button>
+      <button class="btn btn-danger" onclick="resetAll()">🗑️ إعادة تعيين</button>
+    </div>
+
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-label">إجمالي الدين</div>
+        <div class="stat-value gold" id="statTotal">0 ر.س</div>
+      </div>
+      <div class="stat-card success">
+        <div class="stat-label">تم سداده</div>
+        <div class="stat-value success" id="statPaid">0 ر.س</div>
+        <div class="stat-sub" id="statPaidPct">0%</div>
+      </div>
+      <div class="stat-card danger">
+        <div class="stat-label">المتبقي</div>
+        <div class="stat-value danger" id="statRemaining">0 ر.س</div>
+      </div>
+      <div class="stat-card warning">
+        <div class="stat-label">القسط الشهري</div>
+        <div class="stat-value warning" id="statMonthly">0 ر.س</div>
+        <div class="stat-sub" id="statMonthsLeft">0 شهر متبقي</div>
+      </div>
+      <div class="stat-card info">
+        <div class="stat-label">وجدي دفع</div>
+        <div class="stat-value info" id="statWajdiTotal">0 ر.س</div>
+      </div>
+      <div class="stat-card info">
+        <div class="stat-label">شعبان دفع</div>
+        <div class="stat-value info" id="statShabanTotal">0 ر.س</div>
+      </div>
+    </div>
+
+    <div class="section">
+      <h3 class="section-title">📊 نسبة الإنجاز</h3>
+      <div class="progress-container">
+        <div class="progress-bar" id="progressBar" style="width: 0%"></div>
+      </div>
+      <div style="text-align:center; color: var(--gold); font-weight: 700;" id="progressText">0%</div>
+      <div class="chart-container">
+        <canvas id="progressChart"></canvas>
+      </div>
+    </div>
+
+    <div class="section">
+      <h3 class="section-title">💰 توزيع الأقساط</h3>
+      <div class="payers-grid">
+        <div class="payer-card wajdi">
+          <div class="payer-name">وجدي</div>
+          <div class="payer-label">الحصة الشهرية</div>
+          <div class="payer-amount" id="wajdiAmount">0 ر.س</div>
+          <div class="payer-label">إجمالي ما دفعه</div>
+          <div class="payer-amount" style="font-size:1.2rem; color: #60A5FA;" id="wajdiTotal">0 ر.س</div>
+          <div class="payer-label">النسبة</div>
+          <div class="payer-amount" style="font-size:1rem; color: #60A5FA;" id="wajdiPct">0%</div>
+        </div>
+        <div class="payer-card shaban">
+          <div class="payer-name">شعبان</div>
+          <div class="payer-label">الحصة الشهرية</div>
+          <div class="payer-amount" id="shabanAmount">0 ر.س</div>
+          <div class="payer-label">إجمالي ما دفعه</div>
+          <div class="payer-amount" style="font-size:1.2rem; color: #A78BFA;" id="shabanTotal">0 ر.س</div>
+          <div class="payer-label">النسبة</div>
+          <div class="payer-amount" style="font-size:1rem; color: #A78BFA;" id="shabanPct">0%</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <h3 class="section-title">📅 جدول الأقساط</h3>
+      <div class="filter-bar">
+        <button class="filter-btn active" onclick="filterInstallments('all')">الكل</button>
+        <button class="filter-btn" onclick="filterInstallments('paid')">مدفوع</button>
+        <button class="filter-btn" onclick="filterInstallments('upcoming')">قادم</button>
+        <button class="filter-btn" onclick="filterInstallments('overdue')">متأخر</button>
+        <button class="filter-btn" onclick="filterInstallments('notes')">بملاحظات</button>
+      </div>
+      <div id="installmentsList"></div>
+    </div>
+
+    <div class="section">
+      <h3 class="section-title">✍️ توقيع تأكيد السداد</h3>
+      <p style="color: var(--text-dim); margin-bottom: 10px;">وقّع هنا عند كل دفعة</p>
+      <canvas id="signatureCanvas" class="signature-canvas"></canvas>
+      <div class="signature-actions">
+        <button class="btn btn-outline" onclick="clearSignature()">🧹 مسح</button>
+        <button class="btn btn-gold" onclick="saveSignature()">💾 حفظ التوقيع</button>
+      </div>
+      <div id="savedSignatures" style="margin-top: 15px;"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+
+  // ========== Storage & State ==========
+  const STORAGE_KEY = 'debt_plan_qawina_ya_rab_enhanced';
+  const BACKUP_REMINDER_KEY = 'debt_plan_backup_reminder';
+  
+  function saveData() {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    localStorage.setItem(BACKUP_REMINDER_KEY, new Date().toISOString());
+  }
+
+  function loadData() {
+    const data = localStorage.getItem(STORAGE_KEY);
+    if (data) {
+      try { return JSON.parse(data); } catch(e) { return null; }
+    }
+    return null;
+  }
+
+  let state = loadData() || {
+    setup: false, totalDebt: 0, monthlyPayment: 0,
+    wajdiShare: 0, shabanShare: 0, payDay: 15, firstDate: null,
+    installments: [], signatures: [], lastBackup: null
+  };
+  let currentFilter = 'all';
+  let progressChart = null;
+
+  // ========== Setup ==========
+  function saveSetup() {
+    const totalDebt = parseFloat(document.getElementById('totalDebt').value);
+    const monthlyPayment = parseFloat(document.getElementById('monthlyPayment').value);
+    const wajdiShare = parseFloat(document.getElementById('wajdiShare').value) || 0;
+    const shabanShare = parseFloat(document.getElementById('shabanShare').value) || 0;
+    const firstDate = document.getElementById('firstDate').value;
+    const payDay = parseInt(document.getElementById('payDay').value) || 15;
+
+    if (!totalDebt || totalDebt <= 0) { document.getElementById('totalDebtError').style.display = 'block'; return; }
+    if (!monthlyPayment || monthlyPayment <= 0) { document.getElementById('monthlyPaymentError').style.display = 'block'; return; }
+    if (!firstDate) { document.getElementById('firstDateError').style.display = 'block'; return; }
+
+    if (Math.abs((wajdiShare + shabanShare) - monthlyPayment) > 0.01) {
+      document.getElementById('shareWarning').style.display = 'block';
+      if (!confirm('مجموع الحصتين لا يساوي القسط الشهري. هل تريد المتابعة؟')) return;
+    }
+
+    state.setup = true; state.totalDebt = totalDebt; state.monthlyPayment = monthlyPayment;
+    state.wajdiShare = wajdiShare; state.shabanShare = shabanShare;
+    state.payDay = payDay; state.firstDate = firstDate;
+    generateInstallments(); saveData(); render(); showToast('✓ تم حفظ الإعدادات');
+  }
+
+  function generateInstallments() {
+    state.installments = [];
+    const months = Math.ceil(state.totalDebt / state.monthlyPayment);
+    const startDate = new Date(state.firstDate);
+    for (let i = 0; i < months; i++) {
+      const date = new Date(startDate);
+      date.setMonth(date.getMonth() + i);
+      const daysInCurrentMonth = getDaysInMonth(date.getFullYear(), date.getMonth() + 1);
+      date.setDate(Math.min(state.payDay, daysInCurrentMonth));
+      let amount = state.monthlyPayment;
+      const paidSoFar = i * state.monthlyPayment;
+      if (paidSoFar + amount > state.totalDebt) amount = state.totalDebt - paidSoFar;
+      let wajdiAmount = Math.min(state.wajdiShare, amount);
+      let shabanAmount = amount - wajdiAmount;
+      if (shabanAmount > state.shabanShare) {
+        shabanAmount = state.shabanShare; wajdiAmount = amount - shabanAmount;
+      }
+      state.installments.push({
+        id: i + 1, date: date.toISOString().split('T')[0], amount: amount,
+        wajdiAmount: wajdiAmount, shabanAmount: shabanAmount,
+        paid: false, paidDate: null, paymentMethod: null, notes: null
+      });
+    }
+  }
+
+  function getDaysInMonth(year, month) {
+    return new Date(year, month, 0).getDate();
+  }
+
+  // ========== Render ==========
+  function render() {
+    if (!state.setup) {
+      document.getElementById('setupModal').classList.remove('hidden');
+      document.getElementById('dashboard').classList.add('hidden');
+      document.getElementById('firstDate').valueAsDate = new Date();
+      return;
+    }
+    document.getElementById('setupModal').classList.add('hidden');
+    document.getElementById('dashboard').classList.remove('hidden');
+
+    const totalPaid = state.installments.filter(i => i.paid).reduce((s, i) => s + i.amount, 0);
+    const remaining = state.totalDebt - totalPaid;
+    const percentage = (totalPaid / state.totalDebt) * 100;
+    const wajdiTotalPaid = state.installments.filter(i => i.paid).reduce((s, i) => s + i.wajdiAmount, 0);
+    const shabanTotalPaid = state.installments.filter(i => i.paid).reduce((s, i) => s + i.shabanAmount, 0);
+    const monthsLeft = state.installments.filter(i => !i.paid).length;
+    const wajdiPct = state.wajdiShare > 0 ? ((wajdiTotalPaid / state.totalDebt) * 100).toFixed(1) : '0';
+    const shabanPct = state.shabanShare > 0 ? ((shabanTotalPaid / state.totalDebt) * 100).toFixed(1) : '0';
+
+    document.getElementById('statTotal').textContent = formatMoney(state.totalDebt);
+    document.getElementById('statPaid').textContent = formatMoney(totalPaid);
+    document.getElementById('statPaidPct').textContent = percentage.toFixed(1) + '%';
+    document.getElementById('statRemaining').textContent = formatMoney(remaining);
+    document.getElementById('statMonthly').textContent = formatMoney(state.monthlyPayment);
+    document.getElementById('statMonthsLeft').textContent = monthsLeft + ' شهر متبقي';
+    document.getElementById('statWajdiTotal').textContent = formatMoney(wajdiTotalPaid);
+    document.getElementById('statShabanTotal').textContent = formatMoney(shabanTotalPaid);
+    document.getElementById('progressBar').style.width = percentage + '%';
+    document.getElementById('progressText').textContent = percentage.toFixed(1) + '%';
+    document.getElementById('wajdiAmount').textContent = formatMoney(state.wajdiShare);
+    document.getElementById('shabanAmount').textContent = formatMoney(state.shabanShare);
+    document.getElementById('wajdiTotal').textContent = formatMoney(wajdiTotalPaid);
+    document.getElementById('shabanTotal').textContent = formatMoney(shabanTotalPaid);
+    document.getElementById('wajdiPct').textContent = wajdiPct + '%';
+    document.getElementById('shabanPct').textContent = shabanPct + '%';
+
+    renderInstallments(); renderAlerts(); renderSignatures(); renderChart(); checkBackupReminder();
+  }
+
+  function renderChart() {
+    const ctx = document.getElementById('progressChart');
+    if (!ctx) return;
+    if (progressChart) progressChart.destroy();
+    const totalPaid = state.installments.filter(i => i.paid).reduce((s, i) => s + i.amount, 0);
+    const remaining = state.totalDebt - totalPaid;
+    progressChart = new Chart(ctx, {
+      type: 'doughnut',
+      data: {
+        labels: ['مدفوع', 'متبقي'],
+        datasets: [{
+          data: [totalPaid, remaining],
+          backgroundColor: ['rgba(16, 185, 129, 0.8)', 'rgba(239, 68, 68, 0.8)'],
+          borderColor: ['rgba(16, 185, 129, 1)', 'rgba(239, 68, 68, 1)'],
+          borderWidth: 2
+        }]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { position: 'bottom', labels: { color: '#E8E6E1', font: { family: 'Cairo', size: 14 } } } }
+      }
+    });
+  }
+
+  function filterInstallments(filter) {
+    currentFilter = filter;
+    document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
+    const labels = { all: 'الكل', paid: 'مدفوع', upcoming: 'قادم', overdue: 'متأخر', notes: 'بملاحظات' };
+    document.querySelectorAll('.filter-btn').forEach(btn => {
+      if (btn.textContent.trim() === labels[filter]) btn.classList.add('active');
+    });
+    renderInstallments();
+  }
+
+  function renderInstallments() {
+    const list = document.getElementById('installmentsList');
+    list.innerHTML = '';
+    const today = new Date(); today.setHours(0,0,0,0);
+    let filtered = state.installments;
+    if (currentFilter === 'paid') filtered = filtered.filter(i => i.paid);
+    else if (currentFilter === 'upcoming') filtered = filtered.filter(i => !i.paid);
+    else if (currentFilter === 'overdue') filtered = filtered.filter(i => {
+      if (i.paid) return false; const d = Math.floor((new Date(i.date) - today) / 86400000); return d < 0;
+    });
+    else if (currentFilter === 'notes') filtered = filtered.filter(i => i.notes && i.notes.trim() !== '');
+    if (filtered.length === 0) {
+      list.innerHTML = '<p style="text-align:center;color:var(--text-dim);padding:20px">لا توجد أقساط مطابقة</p>';
+      return;
+    }
+    filtered.forEach(inst => {
+      const instDate = new Date(inst.date);
+      const diffDays = Math.floor((instDate - today) / 86400000);
+      let statusClass = '', statusText = '', statusBadge = '';
+      if (inst.paid) { statusClass = 'paid'; statusText = 'مدفوع ✓'; statusBadge = 'paid'; }
+      else if (diffDays < 0) { statusClass = 'overdue'; statusText = 'متأخر'; statusBadge = 'overdue'; }
+      else if (diffDays <= 7) { statusClass = 'upcoming'; statusText = 'قريباً'; statusBadge = 'upcoming'; }
+      else { statusText = 'قادم'; statusBadge = 'upcoming'; }
+      let details = '';
+      if (inst.paid) details = '✓ تم الدفع في ' + formatDate(inst.paidDate) + (inst.paymentMethod ? ' - ' + inst.paymentMethod : '');
+      else if (diffDays >= 0) details = 'متبقي ' + diffDays + ' يوم';
+      else details = 'متأخر ' + Math.abs(diffDays) + ' يوم';
+      const notesHtml = inst.notes && inst.notes.trim() ? '<div class="inst-notes">📝 ' + inst.notes + '</div>' : '';
+      const div = document.createElement('div');
+      div.className = 'installment ' + statusClass;
+      div.innerHTML = `
+        <div class="inst-number">${inst.id}</div>
+        <div class="inst-info">
+          <div class="inst-date">${formatDate(inst.date)}</div>
+          <div class="inst-details">${details}</div>${notesHtml}
+        </div>
+        <div class="inst-amount">
+          <div class="total">${formatMoney(inst.amount)}</div>
+          <div class="split">وجدي: ${formatMoney(inst.wajdiAmount)} | شعبان: ${formatMoney(inst.shabanAmount)}</div>
+        </div>
+        <div class="inst-status">
+          <span class="status-badge ${statusBadge}">${statusText}</span>
+          <div class="action-btns">
+            ${!inst.paid ? `<button class="pay-btn btn-sm" onclick="markPaid(${inst.id})">✓ دفع</button>` : `<button class="pay-btn paid btn-sm" onclick="unmarkPaid(${inst.id})">↺ تراجع</button>`}
+            <button class="btn btn-secondary btn-sm" onclick="showEditModal(${inst.id})">✏️ تعديل</button>
+          </div>
+        </div>`;
+      list.appendChild(div);
+    });
+  }
+
+  function renderAlerts() {
+    const alertBox = document.getElementById('alertBox');
+    alertBox.innerHTML = '';
+    const today = new Date(); today.setHours(0,0,0,0);
+    state.installments.forEach(inst => {
+      if (inst.paid) return;
+      const instDate = new Date(inst.date);
+      const diffDays = Math.floor((instDate - today) / 86400000);
+      if (diffDays === 7) alertBox.innerHTML += '<div class="alert"><div class="alert-icon">⏰</div><div><strong>تنبيه! القسط رقم ' + inst.id + ' بعد أسبوع</strong><br><span style="font-weight:400;font-size:0.9rem">موعد: ' + formatDate(inst.date) + ' - المبلغ: ' + formatMoney(inst.amount) + '</span></div></div>';
+      else if (diffDays < 0) alertBox.innerHTML += '<div class="alert" style="border-color:var(--danger);color:var(--danger);background:linear-gradient(135deg,rgba(239,68,68,0.15),rgba(239,68,68,0.05))"><div class="alert-icon">⚠️</div><div><strong>القسط رقم ' + inst.id + ' متأخر!</strong><br><span style="font-weight:400;font-size:0.9rem">موعد: ' + formatDate(inst.date) + ' - المبلغ: ' + formatMoney(inst.amount) + '</span></div></div>';
+    });
+  }
+
+  function checkBackupReminder() {
+    const box = document.getElementById('backupReminder');
+    const lastBackup = localStorage.getItem(BACKUP_REMINDER_KEY);
+    if (!lastBackup) {
+      box.innerHTML = '<div class="backup-reminder"><div class="alert-icon">💾</div><div><strong>نصيحة:</strong><span style="font-weight:400"> قم بنسخ بياناتك احتياطياً باستخدام "تصدير البيانات"</span></div></div>';
+      return;
+    }
+    const days = Math.floor((new Date() - new Date(lastBackup)) / 86400000);
+    if (days >= 7 && state.setup && state.installments.length > 0) {
+      box.innerHTML = '<div class="backup-reminder"><div class="alert-icon">⏰</div><div><strong>تذكير:</strong><span style="font-weight:400"> لم تقم بنسخ بياناتك منذ ' + days + ' يوم</span></div></div>';
+    } else box.innerHTML = '';
+  }
+
+  // ========== Actions ==========
+  function markPaid(id) {
+    const method = prompt('طريقة الدفع؟ (مثال: كاش، تحويل بنكي، STC Pay)', 'تحويل بنكي');
+    if (method === null) return;
+    const inst = state.installments.find(i => i.id === id);
+    inst.paid = true; inst.paidDate = new Date().toISOString().split('T')[0];
+    inst.paymentMethod = method; saveData(); render(); showToast('✓ تم تسجيل الدفع');
+  }
+
+  function unmarkPaid(id) {
+    if (!confirm('هل أنت متأكد من التراجع عن الدفع؟')) return;
+    const inst = state.installments.find(i => i.id === id);
+    inst.paid = false; inst.paidDate = null; inst.paymentMethod = null;
+    saveData(); render(); showToast('تم التراجع');
+  }
+
+  function showEditModal(id) {
+    const inst = state.installments.find(i => i.id === id);
+    if (!inst) return;
+    document.getElementById('editDate').value = inst.date;
+    document.getElementById('editAmount').value = inst.amount;
+    document.getElementById('editWajdiAmount').value = inst.wajdiAmount;
+    document.getElementById('editShabanAmount').value = inst.shabanAmount;
+    document.getElementById('editNotes').value = inst.notes || '';
+    document.getElementById('editPaymentMethod').value = inst.paymentMethod || '';
+    window.currentEditId = id; document.getElementById('deleteBtn').style.display = 'inline-flex';
+    document.getElementById('editModalOverlay').classList.remove('hidden');
+  }
+
+  function showEditModalForNew() {
+    const lastDate = state.installments.length > 0 ? new Date(state.installments[state.installments.length - 1].date) : new Date(state.firstDate);
+    lastDate.setMonth(lastDate.getMonth() + 1);
+    document.getElementById('editDate').valueAsDate = lastDate;
+    document.getElementById('editAmount').value = state.monthlyPayment;
+    document.getElementById('editWajdiAmount').value = state.wajdiShare;
+    document.getElementById('editShabanAmount').value = state.shabanShare;
+    document.getElementById('editNotes').value = '';
+    document.getElementById('editPaymentMethod').value = '';
+    document.getElementById('deleteBtn').style.display = 'none';
+    window.currentEditId = null;
+    document.getElementById('editModalOverlay').classList.remove('hidden');
+  }
+
+  function closeEditModal() {
+    document.getElementById('editModalOverlay').classList.add('hidden');
+  }
+
+  function saveEdit() {
+    const date = document.getElementById('editDate').value;
+    const amount = parseFloat(document.getElementById('editAmount').value);
+    const wajdiAmount = parseFloat(document.getElementById('editWajdiAmount').value) || 0;
+    const shabanAmount = parseFloat(document.getElementById('editShabanAmount').value) || 0;
+    const notes = document.getElementById('editNotes').value.trim();
+    const paymentMethod = document.getElementById('editPaymentMethod').value;
+    if (!date || !amount || amount <= 0) { alert('من فضلك أكمل البيانات'); return; }
+    if (window.currentEditId) {
+      const inst = state.installments.find(i => i.id === window.currentEditId);
+      inst.date = date; inst.amount = amount; inst.wajdiAmount = wajdiAmount;
+      inst.shabanAmount = shabanAmount; inst.notes = notes || null;
+      if (paymentMethod) { inst.paymentMethod = paymentMethod; inst.paid = true; inst.paidDate = new Date().toISOString().split('T')[0]; }
+      showToast('✓ تم تحديث القسط');
+    } else {
+      const newId = state.installments.length > 0 ? Math.max(...state.installments.map(i => i.id)) + 1 : 1;
+      state.installments.push({ id: newId, date: date, amount: amount, wajdiAmount: wajdiAmount, shabanAmount: shabanAmount, paid: paymentMethod !== '', paidDate: paymentMethod ? new Date().toISOString().split('T')[0] : null, paymentMethod: paymentMethod || null, notes: notes || null });
+      state.installments.sort((a, b) => new Date(a.date) - new Date(b.date));
+      showToast('✓ تم إضافة القسط');
+    }
+    saveData(); closeEditModal(); render();
+  }
+
+  function deleteInstallment() {
+    if (!window.currentEditId) return;
+    if (!confirm('⚠️ هل أنت متأكد من حذف هذا القسط؟')) return;
+    state.installments = state.installments.filter(i => i.id !== window.currentEditId);
+    saveData(); closeEditModal(); render(); showToast('تم حذف القسط');
+  }
+
+  function resetAll() {
+    if (!confirm('⚠️ هل أنت متأكد من حذف كل البيانات؟')) return;
+    if (!confirm('تأكيد نهائي: سيتم مسح كل شيء!')) return;
+    localStorage.removeItem(STORAGE_KEY); localStorage.removeItem(BACKUP_REMINDER_KEY);
+    location.reload();
+  }
+
+  function exportData() {
+    const dataStr = JSON.stringify(state, null, 2);
+    const blob = new Blob([dataStr], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a'); a.href = url; a.download = 'debt_plan_' + new Date().toISOString().split('T')[0] + '.json';
+    a.click(); URL.revokeObjectURL(url); showToast('📤 تم تصدير البيانات'); checkBackupReminder();
+  }
+
+  function importData(event) {
+    const file = event.target.files[0]; if (!file) return;
+    const reader = new FileReader(); reader.onload = (e) => {
+      try { const data = JSON.parse(e.target.result);
+        if (data.setup) { state = data; saveData(); render(); showToast('📥 تم الاستيراد'); }
+        else alert('ملف غير صالح');
+      } catch(err) { alert('خطأ: ' + err.message); }
+    }; reader.readAsText(file); event.target.value = '';
+  }
+
+  // ========== Signature ==========
+  const canvas = document.getElementById('signatureCanvas');
+  const ctx = canvas.getContext('2d');
+  let drawing = false, lastX = 0, lastY = 0;
+  function resizeCanvas() {
+    const ratio = Math.max(window.devicePixelRatio || 1, 1);
+    canvas.width = canvas.offsetWidth * ratio; canvas.height = canvas.offsetHeight * ratio;
+    canvas.getContext('2d').scale(ratio, ratio); clearSignature();
+  }
+  window.addEventListener('resize', resizeCanvas); resizeCanvas();
+  function getPos(e) {
+    const rect = canvas.getBoundingClientRect();
+    const scaleX = canvas.width / rect.width; const scaleY = canvas.height / rect.height;
+    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+    return { x: (clientX - rect.left) * scaleX, y: (clientY - rect.top) * scaleY };
+  }
+  function startDraw(e) { e.preventDefault(); drawing = true; const pos = getPos(e); lastX = pos.x; lastY = pos.y; }
+  function draw(e) { if (!drawing) return; e.preventDefault(); const pos = getPos(e); ctx.strokeStyle = '#0A0E27'; ctx.lineWidth = 2.5; ctx.lineCap = 'round'; ctx.lineJoin = 'round'; ctx.beginPath(); ctx.moveTo(lastX, lastY); ctx.lineTo(pos.x, pos.y); ctx.stroke(); lastX = pos.x; lastY = pos.y; }
+  function endDraw() { drawing = false; }
+  canvas.addEventListener('mousedown', startDraw); canvas.addEventListener('mousemove', draw);
+  canvas.addEventListener('mouseup', endDraw); canvas.addEventListener('mouseout', endDraw);
+  canvas.addEventListener('touchstart', startDraw); canvas.addEventListener('touchmove', draw);
+  canvas.addEventListener('touchend', endDraw);
+  function clearSignature() { ctx.clearRect(0, 0, canvas.width, canvas.height); }
+  function saveSignature() {
+    const dataUrl = canvas.toDataURL();
+    const hasContent = ctx.getImageData(0, 0, canvas.width, canvas.height).data.some(v => v < 250);
+    if (!hasContent) { alert('من فضلك ارسم التوقيع أولاً'); return; }
+    state.signatures.push({ date: new Date().toISOString(), image: dataUrl });
+    saveData(); renderSignatures(); clearSignature(); showToast('✍️ تم حفظ التوقيع');
+  }
+  function renderSignatures() {
+    const container = document.getElementById('savedSignatures');
+    if (!state.signatures.length) { container.innerHTML = '<p style="color:var(--text-dim);text-align:center">لا توجد توقيعات</p>'; return; }
+    container.innerHTML = '<h4 style="color:var(--gold);margin-bottom:10px">التوقيعات:</h4>';
+    state.signatures.slice().reverse().forEach(sig => {
+      const div = document.createElement('div');
+      div.style.cssText = 'display:inline-block;margin:5px;background:var(--cream);padding:8px;border-radius:8px';
+      div.innerHTML = '<img src="' + sig.image + '" style="max-width:200px;height:50px;display:block"><div style="font-size:0.75rem;color:var(--bg-deep);text-align:center;margin-top:4px">' + formatDate(sig.date.split('T')[0]) + '</div>';
+      container.appendChild(div);
+    });
+  }
+
+  // ========== Helpers ==========
+  function formatMoney(n) { return Number(n).toLocaleString('ar-EG', { minimumFractionDigits: 0, maximumFractionDigits: 2 }) + ' ر.س'; }
+  function formatDate(dateStr) { const d = new Date(dateStr); return d.toLocaleDateString('ar-EG', { year: 'numeric', month: 'long', day: 'numeric' }); }
+  function showToast(msg) { const t = document.createElement('div'); t.className = 'toast'; t.textContent = msg; document.body.appendChild(t); setTimeout(() => t.remove(), 2500); }
+
+  // ========== Keyboard Shortcuts ==========
+  document.addEventListener('keydown', (e) => {
+    if (e.ctrlKey && e.key === 'p') { e.preventDefault(); window.print(); }
+    if (e.ctrlKey && (e.key === 's' || e.key === 'e')) { e.preventDefault(); exportData(); }
+    if (e.key === 'Escape') closeEditModal();
+  });
+
+  // ========== Init ==========
+  document.getElementById('firstDate').valueAsDate = new Date();
+  render();
+</script>
+</body>
+</html>
